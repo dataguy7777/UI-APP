@@ -1,13 +1,24 @@
 import streamlit as st
+import os
+import hashlib
 
-# Define the correct password
-PASSWORD = "password"  # Replace with your desired password
+# Optional: Load password from environment variable for better security
+# Make sure to set the environment variable STREAMLIT_PASSWORD before running the app
+# Example (Unix): export STREAMLIT_PASSWORD='your_secure_password'
+PASSWORD = os.getenv("STREAMLIT_PASSWORD", "password")  # Replace with your desired password
+
+# Function to hash passwords
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+# Hashed password for verification
+HASHED_PASSWORD = hash_password(PASSWORD)
 
 # Function to generate download links with icons
 def create_sidebar_link(label, url, icon):
     st.sidebar.markdown(
         f"""
-        <div style="display: flex; align-items: center;">
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
             <img src="{icon}" alt="{label}" style="width:24px; margin-right:10px;">
             <a href="{url}" target="_blank" style="text-decoration: none; color: #1E90FF;">{label}</a>
         </div>
@@ -22,45 +33,55 @@ st.set_page_config(
     layout="wide",
 )
 
-def authenticate():
-    """Simple password authentication."""
-    # Center the password input
-    st.markdown(
-        """
-        <style>
-        .password-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    
+# Custom CSS for styling
+st.markdown(
+    """
+    <style>
+    /* Center the password container */
+    .password-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 150px;
+    }
+    /* Style the password input box */
+    .password-input {
+        width: 300px;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    /* Style the submit button */
+    .password-button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #1E90FF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .password-button:hover {
+        background-color: #0d6efd;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+def authenticate_user():
+    """Authenticate the user with a password."""
     with st.container():
         st.markdown('<div class="password-container">', unsafe_allow_html=True)
-        password = st.text_input("Enter Password:", type="password")
+        password = st.text_input("🔒 Enter Password to Access the App:", type="password", key="password_input")
+        submit = st.button("Submit", key="submit_button")
         st.markdown('</div>', unsafe_allow_html=True)
-        return password
+        return password, submit
 
-def main():
-    # Check if the user has already authenticated
-    if 'authenticated' not in st.session_state:
-        st.session_state.authenticated = False
-
-    if not st.session_state.authenticated:
-        password = authenticate()
-        if password == PASSWORD:
-            st.session_state.authenticated = True
-            st.success("Access Granted!")
-        elif password:
-            st.error("Access Denied. Incorrect Password.")
-        # If not authenticated, do not show the rest of the app
-        if not st.session_state.authenticated:
-            return  # Exit the main function early
-
+def main_app():
     # Sidebar
     st.sidebar.title("📂 Available Files")
     
@@ -105,9 +126,11 @@ def main():
         st.subheader(label)
         st.markdown(
             f"""
-            <a href="{info['url']}" target="_blank">
-                <img src="{info['icon']}" alt="{label}" style="width:50px; vertical-align: middle;">
-                <span style="font-size:18px; color:#1E90FF;">Download {label.split()[1]}</span>
+            <a href="{info['url']}" target="_blank" style="text-decoration: none;">
+                <div style="display: flex; align-items: center;">
+                    <img src="{info['icon']}" alt="{label}" style="width:50px; margin-right: 10px;">
+                    <span style="font-size:18px; color:#1E90FF;">Download {label.split()[1]}</span>
+                </div>
             </a>
             """,
             unsafe_allow_html=True
@@ -123,6 +146,23 @@ def main():
         """,
         unsafe_allow_html=True
     )
+
+def main():
+    # Initialize session state for authentication
+    if 'authenticated' not in st.session_state:
+        st.session_state.authenticated = False
+    
+    if not st.session_state.authenticated:
+        password, submit = authenticate_user()
+        if submit:
+            if hash_password(password) == HASHED_PASSWORD:
+                st.session_state.authenticated = True
+                st.success("✅ Access Granted!")
+                st.experimental_rerun()
+            elif password:
+                st.error("❌ Access Denied. Incorrect Password.")
+    else:
+        main_app()
 
 if __name__ == "__main__":
     main()
