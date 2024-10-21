@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Define the correct password
-PASSWORD = "your_secure_password"  # Replace with your desired password
+PASSWORD = "password"  # Replace with your desired password
 
 # Function to generate download links with icons
 def create_sidebar_link(label, url, icon):
