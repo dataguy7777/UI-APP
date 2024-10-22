@@ -68,11 +68,7 @@ st.markdown(
     .password-button:hover {
         background-color: #0d6efd;
     }
-    /* Style for the DataFrame header */
-    .custom-header th:first-child {
-        background-color: #FF5733 !important;
-        color: white;
-    }
+    /* Optional: Additional styling can be added here */
     </style>
     """,
     unsafe_allow_html=True
@@ -154,13 +150,22 @@ def main_app():
     }
     df = pd.DataFrame(data)
 
-    # Apply styling to the first column header using Styler
+    # Apply styling to the "Name" column header using Styler
     styled_df = df.style.set_table_styles({
         'Name': [{
             'selector': 'th',
-            'props': [('background-color', '#FF5733'), ('color', 'white')]
+            'props': [('color', 'red')]
         }]
     })
+
+    # Optionally, you can add more styling if needed
+    # For example, to set the background color of the header
+    # styled_df = styled_df.set_table_styles({
+    #     'Name': [{
+    #         'selector': 'th',
+    #         'props': [('color', 'red'), ('background-color', '#f2f2f2')]
+    #     }]
+    # })
 
     # Display the styled DataFrame using Streamlit's native support
     st.write(styled_df)
