@@ -2,7 +2,6 @@ import streamlit as st
 import os
 import hashlib
 import pandas as pd
-import io
 
 # Optional: Load password from environment variable for better security
 # Make sure to set the environment variable STREAMLIT_PASSWORD before running the app
@@ -156,12 +155,9 @@ def main_app():
     df = pd.DataFrame(data)
 
     # Apply styling to the first column header using Styler
-    def highlight_first_column_header(s):
-        return ['background-color: #FF5733; color: white;' if i == 0 else '' for i in range(len(s))]
-
     styled_df = df.style.set_table_styles({
         'Name': [{'selector': 'th', 'props': [('background-color', '#FF5733'), ('color', 'white')]}]
-    }).set_table_attributes('class="custom-header"')
+    })
 
     # Render the styled DataFrame as HTML
     html = styled_df.render()
@@ -188,11 +184,12 @@ def main():
         if submit:
             if hash_password(password) == HASHED_PASSWORD:
                 st.session_state.authenticated = True
-                st.success("✅ Access Granted!")
-                st.experimental_rerun()
+                st.experimental_rerun()  # Rerun immediately after setting the state
             elif password:
                 st.error("❌ Access Denied. Incorrect Password.")
     else:
+        # Show success message after rerun
+        st.success("✅ Access Granted!")
         main_app()
 
 if __name__ == "__main__":
