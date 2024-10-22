@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 import hashlib
+import pandas as pd
+import io
 
 # Optional: Load password from environment variable for better security
 # Make sure to set the environment variable STREAMLIT_PASSWORD before running the app
@@ -67,6 +69,11 @@ st.markdown(
     .password-button:hover {
         background-color: #0d6efd;
     }
+    /* Style for the DataFrame header */
+    .custom-header th:first-child {
+        background-color: #FF5733 !important;
+        color: white;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -76,7 +83,7 @@ def authenticate_user():
     """Authenticate the user with a password."""
     with st.container():
         st.markdown('<div class="password-container">', unsafe_allow_html=True)
-        password = st.text_input("🔒 Enter Password to Access the App:", type="password", key="password_input")
+        password = st.text_input("🔒 Enter Password to Access the App:", type="password", key="password_input", help="Enter your secure password.")
         submit = st.button("Submit", key="submit_button")
         st.markdown('</div>', unsafe_allow_html=True)
         return password, submit
@@ -84,7 +91,7 @@ def authenticate_user():
 def main_app():
     # Sidebar
     st.sidebar.title("📂 Available Files")
-    
+
     # Define icons (you can use any icon URLs or base64 encoded images)
     icons = {
         "PDF": "https://img.icons8.com/color/48/000000/pdf-2.png",
@@ -92,7 +99,7 @@ def main_app():
         "Excel": "https://img.icons8.com/color/48/000000/microsoft-excel-2019--v1.png",
         "PowerPoint": "https://img.icons8.com/color/48/000000/microsoft-powerpoint-2019--v1.png",
     }
-    
+
     # List of real open-source documents
     documents = {
         "Sample PDF Document": {
@@ -112,15 +119,15 @@ def main_app():
             "icon": icons["PowerPoint"],
         },
     }
-    
+
     # Create links in the sidebar
     for label, info in documents.items():
         create_sidebar_link(label, info["url"], info["icon"])
-    
+
     # Main Content
     st.title("Welcome to the Open Source File Download App 📂")
     st.write("Use the sidebar to access and download various open-source documents.")
-    
+
     # Display information about the files
     for label, info in documents.items():
         st.subheader(label)
@@ -136,7 +143,31 @@ def main_app():
             unsafe_allow_html=True
         )
         st.markdown("---")
-    
+
+    # Add a small, styled DataFrame
+    st.subheader("Sample DataFrame with Styled Header")
+
+    # Create a sample DataFrame
+    data = {
+        "Name": ["Alice", "Bob", "Charlie"],
+        "Age": [25, 30, 35],
+        "City": ["New York", "Los Angeles", "Chicago"]
+    }
+    df = pd.DataFrame(data)
+
+    # Apply styling to the first column header using Styler
+    def highlight_first_column_header(s):
+        return ['background-color: #FF5733; color: white;' if i == 0 else '' for i in range(len(s))]
+
+    styled_df = df.style.set_table_styles({
+        'Name': [{'selector': 'th', 'props': [('background-color', '#FF5733'), ('color', 'white')]}]
+    }).set_table_attributes('class="custom-header"')
+
+    # Render the styled DataFrame as HTML
+    html = styled_df.render()
+
+    st.markdown(html, unsafe_allow_html=True)
+
     # Footer
     st.markdown(
         """
@@ -151,7 +182,7 @@ def main():
     # Initialize session state for authentication
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
-    
+
     if not st.session_state.authenticated:
         password, submit = authenticate_user()
         if submit:
