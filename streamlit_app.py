@@ -68,7 +68,7 @@ st.markdown(
     .password-button:hover {
         background-color: #0d6efd;
     }
-    /* Optional: Additional styling can be added here */
+    /* Additional styling for the DataFrame header */
     </style>
     """,
     unsafe_allow_html=True
@@ -78,7 +78,12 @@ def authenticate_user():
     """Authenticate the user with a password."""
     with st.container():
         st.markdown('<div class="password-container">', unsafe_allow_html=True)
-        password = st.text_input("🔒 Enter Password to Access the App:", type="password", key="password_input", help="Enter your secure password.")
+        password = st.text_input(
+            "🔒 Enter Password to Access the App:",
+            type="password",
+            key="password_input",
+            help="Enter your secure password."
+        )
         submit = st.button("Submit", key="submit_button")
         st.markdown('</div>', unsafe_allow_html=True)
         return password, submit
@@ -151,21 +156,15 @@ def main_app():
     df = pd.DataFrame(data)
 
     # Apply styling to the "Name" column header using Styler
-    styled_df = df.style.set_table_styles({
-        'Name': [{
-            'selector': 'th',
-            'props': [('color', 'red')]
-        }]
-    })
-
-    # Optionally, you can add more styling if needed
-    # For example, to set the background color of the header
-    # styled_df = styled_df.set_table_styles({
-    #     'Name': [{
-    #         'selector': 'th',
-    #         'props': [('color', 'red'), ('background-color', '#f2f2f2')]
-    #     }]
-    # })
+    styled_df = df.style.set_table_styles(
+        [
+            {
+                # Selector targets the first column header (Name)
+                'selector': 'th.col_heading.level0.col0',
+                'props': [('color', 'red'), ('font-weight', 'bold')]
+            }
+        ]
+    )
 
     # Display the styled DataFrame using Streamlit's native support
     st.write(styled_df)
