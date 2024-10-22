@@ -156,13 +156,14 @@ def main_app():
 
     # Apply styling to the first column header using Styler
     styled_df = df.style.set_table_styles({
-        'Name': [{'selector': 'th', 'props': [('background-color', '#FF5733'), ('color', 'white')]}]
+        'Name': [{
+            'selector': 'th',
+            'props': [('background-color', '#FF5733'), ('color', 'white')]
+        }]
     })
 
-    # Render the styled DataFrame as HTML
-    html = styled_df.render()
-
-    st.markdown(html, unsafe_allow_html=True)
+    # Display the styled DataFrame using Streamlit's native support
+    st.write(styled_df)
 
     # Footer
     st.markdown(
@@ -184,12 +185,11 @@ def main():
         if submit:
             if hash_password(password) == HASHED_PASSWORD:
                 st.session_state.authenticated = True
-                st.experimental_rerun()  # Rerun immediately after setting the state
+                st.success("✅ Access Granted!")
+                st.experimental_rerun()
             elif password:
                 st.error("❌ Access Denied. Incorrect Password.")
     else:
-        # Show success message after rerun
-        st.success("✅ Access Granted!")
         main_app()
 
 if __name__ == "__main__":
